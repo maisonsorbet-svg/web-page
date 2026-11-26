@@ -35,9 +35,9 @@ fr: {
   'p.serum.name': 'Sérum Éclat', 'p.serum.desc': 'Acide hyaluronique, niacinamide et vitamine C dans un sérum doré et léger.',
   'p.cream.name': 'Crème Nuage', 'p.cream.desc': 'Une crème hydratante douce aux céramides et au squalane.',
   'p.cleanser.name': 'Gel Nettoyant Doux', 'p.cleanser.desc': 'Un gel peu moussant qui retire maquillage et écran solaire sans tiraillement.',
-  'p.toner.name': 'Lotion Brume', 'p.toner.desc': 'Une lotion fraîche à la glycérine et au panthénol qui prépare la peau au sérum.',
+  'p.toner.name': 'Lotion Brume', 'p.toner.desc': 'Une brume tonique fraîche à la glycérine et au panthénol, à vaporiser avant le sérum.',
   'p.eye.name': 'Contour des Yeux', 'p.eye.desc': 'Une crème légère à la caféine et aux peptides pour le contour de l’œil.',
-  'p.lip.name': 'Huile à Lèvres', 'p.lip.desc': 'Une huile nourrissante au jojoba et à la vitamine E pour des lèvres douces.',
+  'p.body.name': 'Lait Corps', 'p.body.desc': 'Un lait corps fondant au beurre de karité et à la glycérine pour une peau douce.',
   'pp.back': 'Retour à la boutique', 'pp.volume': 'Contenance',
   'pp.desc': 'Un sérum léger qui associe l’acide hyaluronique pour l’hydratation, la niacinamide et la vitamine C pour un teint plus uniforme, le squalane et la vitamine E pour le confort. Il pénètre vite et s’utilise matin et soir.',
   'pp.qty': 'Quantité', 'pp.less': 'Diminuer la quantité', 'pp.more': 'Augmenter la quantité',
@@ -76,9 +76,9 @@ uk: {
   'p.serum.name': 'Сироватка «Сяйво»', 'p.serum.desc': 'Гіалуронова кислота, ніацинамід і вітамін C у легкій золотистій сироватці.',
   'p.cream.name': 'Крем «Хмара»', 'p.cream.desc': 'М’який зволожувальний крем із керамідами та скваланом.',
   'p.cleanser.name': 'М’який гель для вмивання', 'p.cleanser.desc': 'Гель із ніжною піною, що змиває макіяж і SPF без відчуття стягнутості.',
-  'p.toner.name': 'Тонік «Серпанок»', 'p.toner.desc': 'Свіжий тонік із гліцерином і пантенолом, що готує шкіру до сироватки.',
+  'p.toner.name': 'Тонік «Серпанок»', 'p.toner.desc': 'Свіжий тонік-спрей із гліцерином і пантенолом, який розпилюють перед сироваткою.',
   'p.eye.name': 'Крем для повік', 'p.eye.desc': 'Легкий крем із кофеїном і пептидами для делікатної зони навколо очей.',
-  'p.lip.name': 'Олія для губ', 'p.lip.desc': 'Живильна олія з жожобою та вітаміном E для м’яких губ.',
+  'p.body.name': 'Лосьйон для тіла', 'p.body.desc': 'Ніжний лосьйон для тіла з олією ши та гліцерином для м’якої шкіри.',
   'pp.back': 'Назад до магазину', 'pp.volume': 'Об’єм',
   'pp.desc': 'Легка сироватка, що поєднує гіалуронову кислоту для зволоження, ніацинамід і вітамін C для рівного тону, сквалан і вітамін E для комфорту шкіри. Швидко вбирається, підходить для ранку й вечора.',
   'pp.qty': 'Кількість', 'pp.less': 'Зменшити кількість', 'pp.more': 'Збільшити кількість',
@@ -117,9 +117,9 @@ en: {
   'p.serum.name': 'Radiance Serum', 'p.serum.desc': 'Hyaluronic acid, niacinamide and vitamin C in a light golden serum.',
   'p.cream.name': 'Cloud Cream', 'p.cream.desc': 'A soft moisturiser with ceramides and squalane.',
   'p.cleanser.name': 'Gentle Cleanser', 'p.cleanser.desc': 'A low-foam gel that removes makeup and sunscreen without tightness.',
-  'p.toner.name': 'Mist Toner', 'p.toner.desc': 'A fresh toner with glycerin and panthenol that preps skin for serum.',
+  'p.toner.name': 'Mist Toner', 'p.toner.desc': 'A fresh toner mist with glycerin and panthenol to spray on before serum.',
   'p.eye.name': 'Eye Cream', 'p.eye.desc': 'A light cream with caffeine and peptides for the delicate eye area.',
-  'p.lip.name': 'Lip Oil', 'p.lip.desc': 'A nourishing oil with jojoba and vitamin E for soft lips.',
+  'p.body.name': 'Body Lotion', 'p.body.desc': 'A melting body lotion with shea butter and glycerin for soft skin.',
   'pp.back': 'Back to shop', 'pp.volume': 'Volume',
   'pp.desc': 'A light serum that pairs hyaluronic acid for hydration, niacinamide and vitamin C for a more even tone, and squalane and vitamin E for comfort. It absorbs fast and suits morning and evening use.',
   'pp.qty': 'Quantity', 'pp.less': 'Decrease quantity', 'pp.more': 'Increase quantity',
@@ -134,7 +134,7 @@ const PRODUCTS = [
   { id: 'cleanser', price: 26, vol: 150, img: 'assets/products/cleanser.webp' },
   { id: 'toner', price: 28, vol: 200, img: 'assets/products/toner.webp' },
   { id: 'eye', price: 36, vol: 15, img: 'assets/products/eye.webp' },
-  { id: 'lip', price: 22, vol: 6, img: 'assets/products/lip.webp' }
+  { id: 'body', price: 34, vol: 250, img: 'assets/products/body.webp' }
 ];
 
 const store = {
@@ -145,7 +145,7 @@ const LANGS = ['fr', 'uk', 'en'], LABEL = { fr: 'FR', uk: 'UA', en: 'EN' }, LOCA
 let lang = store.get('nuee-lang');
 if (!LANGS.includes(lang)) lang = 'fr';
 const t = k => (DICT[lang][k] ?? DICT.en[k] ?? k);
-const price = n => new Intl.NumberFormat(LOCALE[lang], { style: 'currency', currency: 'EUR' }).format(n);
+const price = n => new Intl.NumberFormat(LOCALE[lang], { style: 'currency', currency: 'EUR', currencyDisplay: 'narrowSymbol' }).format(n);
 
 /* ---------- menu bar + full-screen menu ---------- */
 const root = document.documentElement;
@@ -230,7 +230,7 @@ addEventListener('storage', e => { if (e.key === 'nuee-cart') { cart = readCart(
 /* ---------- product cards ---------- */
 function renderCards(el, ids) {
   el.innerHTML = PRODUCTS.filter(p => !ids || ids.includes(p.id)).map(p => {
-    const img = `<img src="${p.img}" alt="" data-i18n-alt="p.${p.id}.name" loading="lazy" width="600" height="750">`;
+    const img = `<img src="${p.img}" alt="" data-i18n-alt="p.${p.id}.name" loading="lazy" width="1000" height="1250">`;
     const name = `<span data-i18n="p.${p.id}.name"></span>`;
     return `<article class="card">` +
       (p.link ? `<a class="card-img" href="${p.link}" tabindex="-1">${img}</a>` : `<div class="card-img">${img}</div>`) +
