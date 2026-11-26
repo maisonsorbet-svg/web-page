@@ -1,0 +1,586 @@
+<!doctype html>
+<html lang="en" class="intro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nuée — Radiance Serum</title>
+<link rel="preconnect" href="https://images.higgs.ai" crossorigin>
+<link rel="preconnect" href="https://d8j0ntlcm91z4.cloudfront.net" crossorigin>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600&family=Playfair+Display:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#FAF4EC; --bg3:#F2E6D3; --accent:#C79A67; --ink:#2A2118; --mark:#EDE3D4; --dark:#2B1F14;
+  --s:1px; --c:1px; --fl:0px; --ft:0px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;overscroll-behavior:none;background:var(--bg);color:var(--ink);
+  font-family:Outfit,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+img{display:block;height:auto;user-select:none;-webkit-user-select:none;-webkit-user-drag:none;pointer-events:none}
+
+.stage{position:fixed;left:0;top:0;width:100%;height:100svh;overflow:hidden}
+.layer{position:absolute;inset:0;overflow:hidden}
+.frame{position:absolute;left:var(--fl);top:var(--ft);width:calc(1440 * var(--s));height:calc(900 * var(--s))}
+
+/* nav */
+.nav{position:fixed;top:0;left:0;right:0;z-index:20;display:flex;justify-content:space-between;
+  padding:calc(28 * var(--c)) calc(42 * var(--c)) 0;font-size:max(12px, calc(17 * var(--c)));
+  font-weight:400;letter-spacing:.01em;color:var(--ink);transition:color .5s,opacity .35s ease-out}
+.nav.light{color:#F6EEE2}
+.nav a{color:inherit;text-decoration:none;position:relative;padding:6px 2px;white-space:nowrap}
+.nav a::after{content:"";position:absolute;left:2px;right:2px;bottom:4px;height:1px;background:currentColor;
+  transform:scaleX(0);transform-origin:0 50%;transition:transform .35s}
+.nav a:hover::after,.nav a:focus-visible::after{transform:scaleX(1)}
+
+/* hero */
+.hero{background:#FBF4E9;z-index:1}
+.hero .frame{transform-origin:50% 50%;will-change:transform}
+.hero .frame img,.hero .frame video{position:absolute;width:102.78%;left:-.14%;top:-5.22%}
+.hero .frame video{aspect-ratio:1168/784;opacity:0;object-fit:cover}
+#va{z-index:1}#vb{z-index:2}
+.mark{position:absolute;left:0;right:0;top:0;text-align:center;white-space:nowrap;
+  font-family:"Playfair Display",Georgia,serif;font-weight:400;line-height:1;letter-spacing:-.01em;
+  color:var(--mark);z-index:3;pointer-events:none;transition:opacity .45s ease-out .06s}
+
+/* ingredients */
+.ingr{z-index:2;pointer-events:none}
+.chip{position:absolute;left:0;top:0;transform:translate(-50%, calc(var(--chip) / -2))}
+.in-w{display:flex;flex-direction:column;align-items:center;text-align:center;opacity:0;transform:scale(.7);
+  transform-origin:50% calc(var(--chip) / 2);
+  transition:opacity .5s cubic-bezier(.25,.1,.25,1),transform .7s cubic-bezier(.3,0,.15,1)}
+.ingr.on .in-w{opacity:1;transform:none}
+.disc{width:var(--chip);height:var(--chip);border-radius:50%;padding:4%;background:var(--bg);
+  box-shadow:inset 0 0 0 1px rgba(42,33,24,.18);flex:none}
+.disc i,.thumb i{display:block;width:100%;height:100%;border-radius:50%;background-repeat:no-repeat}
+.disc i{background-size:cover;background-position:center}
+.chip b{font-weight:500;font-size:var(--cn);margin-top:calc(var(--chip) * .2);white-space:nowrap}
+.chip span{color:#4a3d30;font-size:var(--cs);line-height:1.3;max-width:calc(var(--chip) * 2.3)}
+
+/* benefits */
+.bene{background:var(--bg3);z-index:3;transform:translateY(100%);will-change:transform}
+.rows{position:absolute;left:var(--rl);top:50%;transform:translateY(-44%)}
+.row{display:flex;align-items:center;gap:calc(var(--rt) * .28);opacity:0;transform:translateX(60px);
+  transition:opacity .6s cubic-bezier(.25,.1,.25,1),transform 1s cubic-bezier(.3,0,.05,1)}
+.row+.row{margin-top:var(--rg)}
+.bene.on .row{opacity:1;transform:none}
+.bene.on .row:nth-child(2){transition-delay:.12s}
+.bene.on .row:nth-child(3){transition-delay:.24s}
+.thumb{flex:none;width:var(--rt);height:var(--rt);border-radius:50%;padding:4%;background:var(--bg3);
+  box-shadow:inset 0 0 0 1px rgba(42,33,24,.16)}
+.row h3{font-family:"Playfair Display",Georgia,serif;font-weight:500;font-size:var(--rh);line-height:1.2}
+.row p{font-size:var(--rp);line-height:1.45;color:#4a3d30;margin-top:.25em;max-width:var(--rw)}
+.portrait .rows{left:var(--rl);right:var(--rl);top:var(--rtop);transform:none}
+
+/* final scene */
+.scene{background:var(--dark);z-index:4;transform:translateY(100%);will-change:transform}
+.scene .frame img{position:absolute;width:100%;left:0;top:-3.75%}
+.cta{position:absolute;left:0;right:0;top:var(--ctop);display:flex;flex-direction:column;align-items:center;
+  text-align:center;color:#F6EEE2;padding:0 16px}
+.cta h2{font-family:"Playfair Display",Georgia,serif;font-weight:400;font-size:var(--th);letter-spacing:.2em;
+  line-height:1.3;padding-left:.2em;opacity:0;transform:translateY(24px);
+  transition:opacity .9s ease,transform 1s cubic-bezier(.22,1,.36,1)}
+.btn{display:inline-block;margin-top:var(--tb);border:1px solid rgba(246,238,226,.7);border-radius:999px;
+  padding:.7em 2.2em;font-size:var(--tf);letter-spacing:.04em;color:#F6EEE2;text-decoration:none;
+  opacity:0;transform:translateY(18px);
+  transition:opacity .9s ease .15s,transform 1s cubic-bezier(.22,1,.36,1) .15s,background .3s,color .3s}
+.btn:hover,.btn:focus-visible{background:#F6EEE2;color:#2B1F14}
+.scene.on h2,.scene.on .btn{opacity:1;transform:none}
+
+/* product + hand */
+.jar{position:absolute;left:0;top:0;z-index:5;transform-origin:50% 100%;will-change:transform;
+  filter:drop-shadow(0 18px 24px rgba(42,33,24,.18))}
+.hand{position:absolute;left:0;top:0;z-index:6;transform-origin:0 0;overflow:hidden;will-change:transform}
+.hand img{width:100%}
+.hand.raw img{width:119.35%;margin-top:-27.97%} /* uncropped fallback: 1024/858 and 240/858 */
+
+html.intro .nav,html.intro .mark,html.intro .hero .frame,html.intro .jar{opacity:0}
+@media (prefers-reduced-motion: reduce){
+  .nav,.mark,.in-w,.row,.cta h2,.btn{transition:none !important}
+}
+</style>
+</head>
+<body>
+<!--
+  nuée — fictional skincare brand, sample product-story page.
+  Ingredient and benefit copy is based on published dermatology research; see SOURCES.md.
+-->
+<nav class="nav" id="nav">
+  <a href="#home" data-go="0">Home</a>
+  <a href="#products" data-go="1">Products</a>
+  <a href="#about" data-go="2">About</a>
+  <a href="#reviews" data-go="2">Reviews</a>
+  <a href="#contact" data-go="3">Contact</a>
+</nav>
+
+<main class="stage" id="stage">
+  <section class="layer hero" id="hero" aria-label="Nuée">
+    <div class="frame" id="heroFrame">
+      <img alt="" src="https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20261123_060932_bb1e06e4-8bd5-45a0-b4a4-24854cffb528.png&w=2048&q=85">
+      <video id="va" muted playsinline preload="auto" src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20261123_070127_46bf2fe6-4037-462d-aa6a-55d52b357a2d.mp4"></video>
+      <video id="vb" muted playsinline preload="auto" src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20261123_070127_46bf2fe6-4037-462d-aa6a-55d52b357a2d.mp4"></video>
+    </div>
+    <h1 class="mark" id="mark">nuée</h1>
+  </section>
+
+  <section class="layer ingr" id="ingr" aria-label="Ingredients">
+    <div class="chip" data-k="ha"><div class="in-w"><div class="disc"><i></i></div><b>Hyaluronic Acid</b><span>Holds water in skin</span></div></div>
+    <div class="chip" data-k="nia"><div class="in-w"><div class="disc"><i></i></div><b>Niacinamide</b><span>Evens skin tone</span></div></div>
+    <div class="chip" data-k="vc"><div class="in-w"><div class="disc"><i></i></div><b>Vitamin C</b><span>Brightens &amp; protects</span></div></div>
+    <div class="chip" data-k="sq"><div class="in-w"><div class="disc"><i></i></div><b>Squalane</b><span>Weightless moisture</span></div></div>
+    <div class="chip" data-k="ve"><div class="in-w"><div class="disc"><i></i></div><b>Vitamin E</b><span>Antioxidant care</span></div></div>
+  </section>
+
+  <section class="layer bene" id="bene" aria-label="Benefits">
+    <div class="rows" id="rows">
+      <div class="row"><div class="thumb"><i data-crop="345,560,150"></i></div><div><h3>Deep Hydration</h3><p>Hyaluronic acid binds water to plump and smooth the skin’s surface.</p></div></div>
+      <div class="row"><div class="thumb"><i data-crop="362,262,132"></i></div><div><h3>Brighter, Even Tone</h3><p>Niacinamide and vitamin C help fade dullness and dark spots over time.</p></div></div>
+      <div class="row"><div class="thumb"><i data-crop="410,430,150"></i></div><div><h3>Light as Mist</h3><p>Squalane mirrors the skin’s own oils, so it sinks in fast with no greasy feel.</p></div></div>
+    </div>
+  </section>
+
+  <section class="layer scene" id="scene" aria-label="Discover">
+    <div class="frame">
+      <img alt="" src="https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20261123_060933_bddedf90-ba56-477b-9c32-901bc025bdb0.png&w=2048&q=85">
+    </div>
+    <div class="cta" id="cta">
+      <h2>BORN OF THE MIST,<br>MADE FOR YOUR SKIN.</h2>
+      <a class="btn" href="#home" data-go="0">Discover</a>
+    </div>
+  </section>
+
+  <img class="jar" id="jar" alt="Nuée radiance serum, a glass dropper bottle with a gold collar" src="assets/nuee-serum.webp">
+  <div class="hand" id="hand"><img id="handImg" alt=""></div>
+</main>
+
+<script>
+(() => {
+'use strict';
+const HAND_URL = 'https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20261123_061028_dd300bd1-4172-4809-abac-c1b9e7660381.png&w=1024&q=85';
+const HAND_CROP = [0, 240, 858, 262];
+const HAND_R = 262 / 858;
+const BOT_R = 597 / 185;            // serum bottle cutout height / width
+const PHOTO = 'assets/nuee-serum-photo.jpg', PHOTO_N = 736;
+
+const $ = id => document.getElementById(id);
+const root = document.documentElement;
+const stage = $('stage'), nav = $('nav'), hero = $('hero'), heroFrame = $('heroFrame'), mark = $('mark');
+const ingr = $('ingr'), bene = $('bene'), rowsEl = $('rows'), scene = $('scene'), cta = $('cta');
+const jar = $('jar'), hand = $('hand'), handImg = $('handImg');
+const va = $('va'), vb = $('vb');
+const chips = [...document.querySelectorAll('.chip')];
+const RM = matchMedia('(prefers-reduced-motion: reduce)');
+
+/* ---------- easing ---------- */
+function bezier(x1, y1, x2, y2) {
+  const cx = 3 * x1, bx = 3 * (x2 - x1) - cx, ax = 1 - cx - bx;
+  const cy = 3 * y1, by = 3 * (y2 - y1) - cy, ay = 1 - cy - by;
+  const sx = t => ((ax * t + bx) * t + cx) * t, sy = t => ((ay * t + by) * t + cy) * t;
+  const dx = t => (3 * ax * t + 2 * bx) * t + cx;
+  return x => {
+    if (x <= 0) return 0; if (x >= 1) return 1;
+    let t = x;
+    for (let i = 0; i < 8; i++) { const e = sx(t) - x, d = dx(t); if (Math.abs(e) < 1e-6) return sy(t); if (Math.abs(d) < 1e-6) break; t -= e / d; }
+    let lo = 0, hi = 1; t = x;
+    for (let i = 0; i < 30; i++) { const v = sx(t); if (Math.abs(v - x) < 1e-6) break; if (v < x) lo = t; else hi = t; t = (lo + hi) / 2; }
+    return sy(t);
+  };
+}
+const EJ = bezier(.3, 0, .05, 1), EP = bezier(.3, 0, .15, 1), EF = bezier(.25, .1, .25, 1), EY = bezier(.5, 0, .1, 1);
+const EI = bezier(.5, 0, 0, 1);
+
+/* ---------- channels ---------- */
+class Axis {
+  constructor(v) { this.v = v; this.cur = null; this.next = null; }
+  set(to, dur, ease, delay, now) {
+    if (!dur && !delay) { this.v = to; this.cur = this.next = null; return; }
+    this.next = { to, dur: dur || 0, ease, start: now + (delay || 0) };
+    if (!delay) this.tick(now);
+  }
+  tick(now) {
+    if (this.next && now >= this.next.start) {
+      const n = this.next; this.next = null;
+      this.cur = { from: this.v, to: n.to, t0: n.start, dur: n.dur, ease: n.ease };
+    }
+    if (this.cur) {
+      const c = this.cur, p = c.dur ? Math.min(1, (now - c.t0) / c.dur) : 1;
+      this.v = c.from + (c.to - c.from) * c.ease(p);
+      if (p >= 1) { this.v = c.to; this.cur = null; }
+    }
+  }
+}
+class Channel {
+  constructor(v) { this.arr = Array.isArray(v); this.ax = (this.arr ? v : [v]).map(x => new Axis(x)); }
+  get v() { return this.arr ? this.ax.map(a => a.v) : this.ax[0].v; }
+  // spec: {dur, ease, delay} or, for arrays, an array of per-axis specs
+  to(target, spec, now = performance.now()) {
+    const t = this.arr ? target : [target];
+    t.forEach((x, i) => {
+      const sp = Array.isArray(spec) ? spec[i] : spec;
+      this.ax[i].set(x, instantMode ? 0 : sp.dur, sp.ease || EP, instantMode ? 0 : sp.delay || 0, now);
+    });
+  }
+  snap(target) { (this.arr ? target : [target]).forEach((x, i) => this.ax[i].set(x, 0, EP, 0, 0)); }
+  tick(now) { this.ax.forEach(a => a.tick(now)); }
+}
+let instantMode = false;
+
+/* ---------- layout ---------- */
+let vw, vh, s, c, fl, ft, ul, ut, portrait, navBottom;
+let K0, K1, K2, K4, W = 300, hw = 900, hx0 = 0, handTop = 0;
+const F = (x, y, h) => ({ x: fl + x * s, y: ft + y * s, h: h * s });
+const U = (x, y, h) => ({ x: ul + x * c, y: ut + y * c, h: h * c });
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const setVar = (el, k, v) => el.style.setProperty(k, v);
+
+function layout() {
+  vw = innerWidth; vh = stage.clientHeight;
+  s = Math.max(vw / 1440, vh / 900); c = Math.min(vw / 1440, vh / 900);
+  fl = (vw - 1440 * s) / 2; ft = (vh - 900 * s) / 2; ul = (vw - 1440 * c) / 2; ut = (vh - 900 * c) / 2;
+  portrait = vw / vh < 0.9;
+  root.classList.toggle('portrait', portrait);
+  setVar(root, '--s', s + 'px'); setVar(root, '--c', c + 'px'); setVar(root, '--fl', fl + 'px'); setVar(root, '--ft', ft + 'px');
+  navBottom = nav.getBoundingClientRect().bottom;
+
+  // K0 — standing on the flat top of the rock
+  K0 = F(720, 490, 330);
+  if (portrait) K0.h = Math.min(K0.h, 0.48 * vw * BOT_R);
+  K0.h = Math.max(60, Math.min(K0.h, K0.y - navBottom - 10)); // never touch the nav
+
+  /* chips */
+  let chip, labelBottom = 0;
+  if (!portrait) {
+    chip = Math.max(44, 116 * c);
+    setVar(ingr, '--chip', chip + 'px'); setVar(ingr, '--cn', Math.max(12, 21 * c) + 'px'); setVar(ingr, '--cs', Math.max(11, 17.5 * c) + 'px');
+    const kx = Math.max(c, 0.96 * vw / 1440);
+    const dy = Math.max(0, navBottom + 6 - (ut + 196 * c - chip / 2));
+    const P = { ha: [230, 421], nia: [454, 268], vc: [720, 196], sq: [988, 278], ve: [1212, 439] };
+    chips.forEach(el => { const p = P[el.dataset.k]; place(el, vw / 2 + (p[0] - 720) * kx, ut + p[1] * c + dy); });
+    K1 = U(720, 1040, 640); K1.x = vw / 2; K1.y += dy;
+  } else {
+    chip = Math.min(Math.max(58, 0.17 * vw), 96);
+    setVar(ingr, '--chip', chip + 'px');
+    setVar(ingr, '--cn', Math.min(Math.max(12, 0.034 * vw), 17) + 'px'); setVar(ingr, '--cs', Math.min(Math.max(11, 0.029 * vw), 15) + 'px');
+    const top = Math.max(64, 0.06 * vh, navBottom + 8) + chip / 2 + 8;
+    const row2 = top + chip + Math.max(84, 0.10 * vh);
+    const P = { nia: [0.20, top + 0.35 * chip], vc: [0.50, top], sq: [0.80, top + 0.35 * chip], ha: [0.25, row2], ve: [0.75, row2] };
+    chips.forEach(el => { const p = P[el.dataset.k]; place(el, p[0] * vw, p[1] + 0.55 * chip); });
+    chips.forEach(el => { labelBottom = Math.max(labelBottom, parseFloat(el.style.top) - chip / 2 + el.offsetHeight); });
+    const h1 = 0.55 * vh;
+    K1 = { x: vw / 2, h: h1, y: Math.max(vh + 0.16 * h1, labelBottom + 10 + h1) };
+  }
+
+  /* benefits */
+  if (!portrait) {
+    setVar(bene, '--rt', Math.max(48, 96 * c) + 'px'); setVar(bene, '--rh', Math.max(14, 25 * c) + 'px');
+    setVar(bene, '--rp', Math.max(11, 16.5 * c) + 'px'); setVar(bene, '--rg', Math.max(14, 40 * c) + 'px');
+    setVar(bene, '--rw', Math.max(200, 330 * c) + 'px'); setVar(bene, '--rl', (ul + 915 * c) + 'px');
+    K2 = U(465, 640, 340);
+    hw = K2.h * 2.8;
+    hx0 = K2.x - 0.56 * hw;
+    K2.x = hx0 + 0.63 * hw;
+    if (hx0 > 0) { hw = K2.x / 0.63; hx0 = 0; } // forearm always runs off the left edge
+  } else {
+    setVar(bene, '--rt', Math.min(Math.max(48, 0.13 * vw), 76) + 'px'); setVar(bene, '--rh', Math.min(Math.max(15, 0.042 * vw), 22) + 'px');
+    setVar(bene, '--rp', Math.min(Math.max(12, 0.033 * vw), 16) + 'px'); setVar(bene, '--rg', Math.min(Math.max(12, 0.022 * vh), 26) + 'px');
+    setVar(bene, '--rw', 'none'); setVar(bene, '--rl', Math.max(18, 0.06 * vw) + 'px');
+    setVar(bene, '--rtop', (Math.max(64, 0.07 * vh, navBottom + 4) + 10) + 'px');
+    const rowsBottom = rowsEl.offsetTop + rowsEl.offsetHeight;
+    const y = 0.80 * vh;
+    const h = Math.max(90, Math.min(0.30 * vh, 0.8 * vw, y - rowsBottom - 16));
+    K2 = { x: vw / 2, y, h };
+    hw = Math.max(h * 2.8, 1.15 * vw);
+    hx0 = vw / 2 - 0.63 * hw;
+  }
+  const hh = hw * HAND_R;
+  handTop = K2.y + 0.05 * K2.h - 0.30 * hh;
+  hand.style.width = hw + 'px'; hand.style.height = hh + 'px';
+
+  /* final scene */
+  K4 = F(720, 697, 240);
+  if (!portrait) {
+    setVar(cta, '--th', Math.max(17, 34 * c) + 'px'); setVar(cta, '--tf', Math.max(12, 16 * c) + 'px');
+    setVar(cta, '--tb', Math.max(16, 30 * c) + 'px'); setVar(cta, '--ctop', Math.max(ut + 150 * c, navBottom + 16) + 'px');
+  } else {
+    setVar(cta, '--th', Math.min(Math.max(16, 0.052 * vw), 34) + 'px'); setVar(cta, '--tf', '14px');
+    setVar(cta, '--tb', '20px'); setVar(cta, '--ctop', Math.max(84, 0.13 * vh) + 'px');
+  }
+
+  /* product image base width = largest keyframe width */
+  W = Math.max(K0.h, K1.h, K2.h, K4.h) / BOT_R;
+  jar.style.width = W + 'px';
+
+  layoutMark();
+}
+function place(el, x, y) { el.style.left = x + 'px'; el.style.top = y + 'px'; }
+
+/* wordmark: sized by its rendered width, x-height centred on the bottle's upper quarter */
+const mctx = document.createElement('canvas').getContext('2d');
+function layoutMark() {
+  const target = portrait ? 0.9 * vw : Math.min(820 * s, 0.86 * vw);
+  mark.style.fontSize = '100px';
+  const r = document.createRange(); r.selectNodeContents(mark);
+  const w100 = r.getBoundingClientRect().width || 200;
+  const fs = 100 * target / w100;
+  mark.style.fontSize = fs + 'px';
+  mctx.font = `400 ${fs}px "Playfair Display"`;
+  const m = mctx.measureText('nuee');
+  const fa = m.fontBoundingBoxAscent ?? fs * 1.082, fd = m.fontBoundingBoxDescent ?? fs * .251;
+  const base = (fs - (fa + fd)) / 2 + fa;               // baseline offset inside a line-height:1 box
+  const xh = mctx.measureText('nuu').actualBoundingBoxAscent || fs * .514;
+  const acc = mctx.measureText('é').actualBoundingBoxAscent || fs * .74;
+  const bottleTop = K0.y - K0.h;
+  let top = bottleTop + 0.25 * K0.h - (base - xh / 2);
+  const minTop = navBottom + 12 - (base - acc);          // keep the accent 12px clear of the nav
+  if (top < minTop) top = minTop;
+  mark.style.top = top + 'px';
+}
+
+/* ---------- channels & states ---------- */
+const ch = {
+  jar: new Channel([0, 0, 0]), hero: new Channel(1), bene: new Channel(0), handOut: new Channel(0),
+  rows: new Channel(0), scene: new Channel(0), intro: new Channel(0)
+};
+const key = n => [K0, K1, K2, K4][n];
+const kv = k => [k.x, k.y, k.h];
+let state = 0, timers = [];
+
+function setOn(el, on, delay) {
+  if (!on) { el.classList.remove('on'); return; }
+  if (instantMode || !delay) { el.classList.add('on'); return; }
+  timers.push(setTimeout(() => el.classList.add('on'), delay));
+}
+function go(n, instant) {
+  n = clamp(n | 0, 0, 3);
+  const from = state; state = n; api.state = n;
+  instantMode = !!instant || RM.matches;
+  timers.forEach(clearTimeout); timers = [];
+  const now = performance.now();
+  const J = { dur: 1150, ease: EJ }, P7 = { dur: 700, ease: EP }, P65 = { dur: 650, ease: EP };
+  [ingr, bene, scene].forEach(l => l.classList.remove('on'));
+
+  if (n === 0) {
+    ch.jar.to(kv(K0), J, now); ch.hero.to(1, P7, now); ch.bene.to(0, P65, now);
+    ch.handOut.to(0, P65, now); ch.rows.to(0, { dur: 400, ease: EF }, now); ch.scene.to(0, P65, now);
+  } else if (n === 1) {
+    ch.jar.to(kv(K1), J, now); ch.hero.to(0, P7, now); ch.bene.to(0, P65, now);
+    ch.handOut.to(0, P65, now); ch.rows.to(0, { dur: 400, ease: EF }, now); ch.scene.to(0, P65, now);
+    setOn(ingr, true, from < 1 ? 1000 : 600);
+  } else if (n === 2) {
+    const back = from === 3;
+    ch.jar.to(kv(K2), J, now); ch.hero.to(0, P7, now); ch.bene.to(1, P65, now); ch.scene.to(0, P65, now);
+    ch.handOut.to(0, { dur: 650, ease: EP, delay: back ? 150 : 0 }, now);
+    ch.rows.to(1, { dur: 500, ease: EF, delay: back ? 300 : 0 }, now);
+    setOn(bene, true, back ? 350 : 550);
+  } else {
+    if (from === 2) ch.jar.to(kv(K4), [{ dur: 700, ease: EJ }, { dur: 1600, ease: EY }, { dur: 1600, ease: EJ }], now);
+    else ch.jar.to(kv(K4), J, now);
+    ch.hero.to(0, P7, now);
+    ch.handOut.to(1, { dur: 600, ease: EP }, now); ch.rows.to(0, { dur: 400, ease: EF }, now);
+    ch.scene.to(1, { dur: 650, ease: EP, delay: 350 }, now);
+    setOn(scene, true, 1350);
+  }
+  instantMode = false;
+}
+function snapAll() {
+  const n = state;
+  ch.jar.snap(kv(key(n)));
+  ch.hero.snap(n === 0 ? 1 : 0); ch.bene.snap(n >= 2 ? 1 : 0); ch.handOut.snap(n === 3 ? 1 : 0);
+  ch.rows.snap(n === 2 ? 1 : 0); ch.scene.snap(n === 3 ? 1 : 0);
+}
+
+/* ---------- render loop ---------- */
+function render(now) {
+  for (const k in ch) ch[k].tick(now);
+  const [x, y, h] = ch.jar.v, w = h / BOT_R, io = ch.intro.v;
+  jar.style.transform = `translate3d(${x - W / 2}px,${y - W * BOT_R + io}px,0) scale(${w / W})`;
+  const hv = ch.hero.v;
+  hero.style.opacity = hv;
+  heroFrame.style.transform = `translate3d(0,${io}px,0) scale(${1 + (1 - hv) * 0.06})`;
+  const b = ch.bene.v;
+  bene.style.transform = `translate3d(0,${(1 - b) * 100}%,0)`;
+  hand.style.transform = `translate3d(${hx0 - ch.handOut.v * (hx0 + 1.05 * hw)}px,${handTop + (1 - b) * vh}px,0)`;
+  rowsEl.style.opacity = ch.rows.v;
+  const sc = ch.scene.v;
+  scene.style.transform = `translate3d(0,${(1 - sc) * 100}%,0)`;
+  nav.classList.toggle('light', sc > 0.96);
+  videoTick(hv);
+  requestAnimationFrame(render);
+}
+
+/* ---------- hero water loop (two-video crossfade) ---------- */
+let vActive = va, vIdle = vb, fading = false, vPaused = false, vStarted = false;
+[va, vb].forEach(v => { v.muted = true; v.style.transition = 'opacity .6s linear'; });
+function startVideo() {
+  if (RM.matches) return;
+  va.currentTime = 0;
+  va.addEventListener('playing', () => { va.style.transition = 'none'; va.style.opacity = 1; requestAnimationFrame(() => va.style.transition = 'opacity .6s linear'); }, { once: true });
+  va.play().then(() => vStarted = true).catch(() => {});
+}
+function videoTick(hv) {
+  if (!vStarted) return;
+  const hidden = state !== 0 && hv < 0.01;
+  if (hidden && !vPaused) { va.pause(); vb.pause(); vPaused = true; return; }
+  if (!hidden && vPaused) { vPaused = false; vActive.play().catch(() => {}); }
+  if (vPaused || fading) return;
+  const d = vActive.duration;
+  if (d && vActive.currentTime >= d - 0.6) {
+    fading = true;
+    const inc = vIdle, out = vActive;
+    inc.style.zIndex = 2; out.style.zIndex = 1;
+    inc.currentTime = 0;
+    inc.play().catch(() => {});
+    inc.style.opacity = 1;
+    setTimeout(() => {
+      out.pause(); out.style.transition = 'none'; out.style.opacity = 0;
+      requestAnimationFrame(() => out.style.transition = 'opacity .6s linear');
+      vActive = inc; vIdle = out; fading = false;
+    }, 600);
+  }
+}
+
+/* ---------- input: one gesture = one step ---------- */
+let lockUntil = 0, wAcc = 0, wLast = 0, wPrev = 0, needFresh = false;
+function step(dir) {
+  const now = performance.now();
+  if (now < lockUntil) return;
+  const n = clamp(state + dir, 0, 3);
+  if (n !== state) { go(n); lockUntil = now + 1000; }
+}
+addEventListener('wheel', e => {
+  e.preventDefault();
+  const now = performance.now();
+  const d = e.deltaY * (e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? vh : 1), a = Math.abs(d);
+  const fresh = now - wLast > 160 || a > 1.6 * wPrev + 4;
+  wLast = now; wPrev = a;
+  if (fresh) { wAcc = 0; needFresh = false; }
+  if (now < lockUntil || needFresh) return;
+  wAcc += d;
+  if (Math.abs(wAcc) > 24) { step(Math.sign(wAcc)); wAcc = 0; needFresh = true; }
+}, { passive: false });
+let tY = null;
+addEventListener('touchstart', e => { tY = e.touches[0].clientY; }, { passive: true });
+addEventListener('touchmove', e => e.preventDefault(), { passive: false });
+addEventListener('touchend', e => {
+  if (tY == null) return;
+  const dy = tY - e.changedTouches[0].clientY; tY = null;
+  if (Math.abs(dy) > 40) step(Math.sign(dy));
+});
+addEventListener('keydown', e => {
+  const k = e.key;
+  if (k === 'ArrowDown' || k === 'PageDown' || k === ' ') { e.preventDefault(); step(1); }
+  else if (k === 'ArrowUp' || k === 'PageUp') { e.preventDefault(); step(-1); }
+  else if (k === 'Home') { e.preventDefault(); go(0); }
+  else if (k === 'End') { e.preventDefault(); go(3); }
+});
+document.querySelectorAll('[data-go]').forEach(a => a.addEventListener('click', e => {
+  e.preventDefault(); go(+a.dataset.go); lockUntil = performance.now() + 1000;
+}));
+addEventListener('resize', () => { layout(); snapAll(); go(state, true); });
+
+const api = { go: (n, instant) => go(n, instant), state: 0 };
+window.nuee = api;
+
+/* ---------- artwork ---------- */
+// Benefit thumbnails: circular crops of the product photo (cx, cy, size in source px)
+document.querySelectorAll('.thumb i').forEach(i => {
+  const [cx, cy, S] = i.dataset.crop.split(',').map(Number);
+  i.style.backgroundImage = `url("${PHOTO}")`;
+  i.style.backgroundSize = `${PHOTO_N / S * 100}% ${PHOTO_N / S * 100}%`;
+  i.style.backgroundPosition = `${(cx - S / 2) / (PHOTO_N - S) * 100}% ${(cy - S / 2) / (PHOTO_N - S) * 100}%`;
+});
+// Ingredient discs: drawn macro textures (SVG)
+function rng(seed) { return () => (seed = (seed * 16807) % 2147483647) / 2147483647; }
+const svg = body => `url("data:image/svg+xml;utf8,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>${body}</svg>`)}")`;
+const ART = {
+  ha() { // clear gel with suspended bubbles
+    const r = rng(7); let b = '';
+    for (let i = 0; i < 16; i++) { const x = r() * 100, y = r() * 100, rr = 2 + r() * 9;
+      b += `<circle cx='${x}' cy='${y}' r='${rr}' fill='url(#bub)' stroke='#fff' stroke-opacity='.85' stroke-width='.7'/><circle cx='${x - rr * .35}' cy='${y - rr * .4}' r='${rr * .22}' fill='#fff' opacity='.9'/>`; }
+    return `<defs><radialGradient id='g' cx='.4' cy='.35' r='.8'><stop offset='0' stop-color='#f4f8f8'/><stop offset='1' stop-color='#c9d9dc'/></radialGradient><radialGradient id='bub' cx='.5' cy='.5' r='.5'><stop offset='.6' stop-color='#fff' stop-opacity='0'/><stop offset='1' stop-color='#9fb9bf' stop-opacity='.55'/></radialGradient></defs><rect width='100' height='100' fill='url(#g)'/>${b}`;
+  },
+  nia() { // fine white crystalline powder
+    const r = rng(11); let b = '';
+    for (let i = 0; i < 170; i++) { const x = r() * 100, y = 30 + r() * 75, z = .6 + r() * 2.4, a = r() * 180;
+      b += `<rect x='${x}' y='${y}' width='${z}' height='${z * (.6 + r())}' transform='rotate(${a} ${x} ${y})' fill='${r() > .3 ? '#ffffff' : '#d9d2c6'}'/>`; }
+    return `<defs><linearGradient id='g' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#efe9df'/><stop offset='1' stop-color='#d8cfc1'/></linearGradient><radialGradient id='m' cx='.5' cy='.85' r='.6'><stop offset='0' stop-color='#fff' stop-opacity='.95'/><stop offset='1' stop-color='#fff' stop-opacity='0'/></radialGradient></defs><rect width='100' height='100' fill='url(#g)'/><ellipse cx='50' cy='88' rx='58' ry='40' fill='url(#m)'/>${b}`;
+  },
+  vc() { // citrus cross-section
+    let b = '';
+    for (let i = 0; i < 10; i++) { const a0 = i * 36 + 3, a1 = i * 36 + 33, R = 38, rad = d => d * Math.PI / 180;
+      const p = (a, rr) => `${50 + rr * Math.cos(rad(a))},${50 + rr * Math.sin(rad(a))}`;
+      b += `<path d='M${p((a0 + a1) / 2, 6)} L${p(a0, R)} A${R} ${R} 0 0 1 ${p(a1, R)} Z' fill='url(#seg)'/>`; }
+    return `<defs><radialGradient id='seg' cx='.5' cy='.5' r='.5'><stop offset='0' stop-color='#ffd37a'/><stop offset='1' stop-color='#f39a2b'/></radialGradient></defs><rect width='100' height='100' fill='#f6c873'/><circle cx='50' cy='50' r='48' fill='#e9842a'/><circle cx='50' cy='50' r='43' fill='#fbf0d6'/>${b}<circle cx='50' cy='50' r='5' fill='#fbf0d6'/>`;
+  },
+  sq() { // golden oil with clear droplets
+    const r = rng(23); let b = '';
+    for (let i = 0; i < 9; i++) { const x = 8 + r() * 84, y = 8 + r() * 84, rr = 4 + r() * 10;
+      b += `<circle cx='${x}' cy='${y}' r='${rr}' fill='url(#d)'/><ellipse cx='${x - rr * .3}' cy='${y - rr * .45}' rx='${rr * .4}' ry='${rr * .2}' fill='#fff' opacity='.85'/>`; }
+    return `<defs><radialGradient id='g' cx='.35' cy='.3' r='.9'><stop offset='0' stop-color='#f8ebc6'/><stop offset='1' stop-color='#d6ad5e'/></radialGradient><radialGradient id='d' cx='.55' cy='.6' r='.6'><stop offset='0' stop-color='#fff6d8' stop-opacity='.9'/><stop offset='.75' stop-color='#e9c77c' stop-opacity='.6'/><stop offset='1' stop-color='#a77a2a' stop-opacity='.8'/></radialGradient></defs><rect width='100' height='100' fill='url(#g)'/>${b}`;
+  },
+  ve() { // amber softgel capsules
+    const cap = (x, y, a, s) => `<g transform='translate(${x} ${y}) rotate(${a}) scale(${s})'><ellipse rx='22' ry='13' fill='url(#cap)'/><ellipse cx='-6' cy='-6' rx='10' ry='3' fill='#fff' opacity='.75'/></g>`;
+    return `<defs><radialGradient id='g' cx='.5' cy='.4' r='.8'><stop offset='0' stop-color='#fbf3e4'/><stop offset='1' stop-color='#e8d7b9'/></radialGradient><radialGradient id='cap' cx='.45' cy='.4' r='.7'><stop offset='0' stop-color='#ffd97a'/><stop offset='.6' stop-color='#e0a334'/><stop offset='1' stop-color='#9a5f12'/></radialGradient></defs><rect width='100' height='100' fill='url(#g)'/><ellipse cx='52' cy='76' rx='40' ry='8' fill='#b98d4e' opacity='.18'/>${cap(36, 40, -28, 1)}${cap(64, 64, 20, 1.05)}`;
+  }
+};
+chips.forEach(el => { el.querySelector('i').style.backgroundImage = svg(ART[el.dataset.k]()); });
+
+/* ---------- hand cutout clean-up (erode 2px, feather once) ---------- */
+function cleanCutout(url, crop) {
+  return new Promise((res, rej) => {
+    const img = new Image(); img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      try {
+        const [cx, cy, cw, chh] = crop, cv = document.createElement('canvas');
+        cv.width = cw; cv.height = chh;
+        const g = cv.getContext('2d'); g.drawImage(img, cx, cy, cw, chh, 0, 0, cw, chh);
+        const d = g.getImageData(0, 0, cw, chh), px = d.data, n = cw * chh;
+        let a = new Uint8ClampedArray(n); for (let i = 0; i < n; i++) a[i] = px[i * 4 + 3];
+        const at = (A, x, y) => (x < 0 || y < 0 || x >= cw || y >= chh) ? 0 : A[y * cw + x];
+        for (let pass = 0; pass < 2; pass++) {
+          const b = new Uint8ClampedArray(n);
+          for (let y = 0; y < chh; y++) for (let x = 0; x < cw; x++)
+            b[y * cw + x] = Math.min(at(a, x, y), at(a, x - 1, y), at(a, x + 1, y), at(a, x, y - 1), at(a, x, y + 1));
+          a = b;
+        }
+        const f = new Uint8ClampedArray(n);
+        for (let y = 0; y < chh; y++) for (let x = 0; x < cw; x++) {
+          let sum = 4 * a[y * cw + x], cnt = 4;
+          [[-1, 0], [1, 0], [0, -1], [0, 1]].forEach(([dx, dy]) => { const X = x + dx, Y = y + dy; if (X >= 0 && Y >= 0 && X < cw && Y < chh) { sum += a[Y * cw + X]; cnt++; } });
+          f[y * cw + x] = sum / cnt;
+        }
+        for (let i = 0; i < n; i++) px[i * 4 + 3] = f[i];
+        g.putImageData(d, 0, 0);
+        cv.toBlob(bl => bl ? res(URL.createObjectURL(bl)) : rej(), 'image/webp', 0.92);
+      } catch (e) { rej(e); }
+    };
+    img.onerror = rej; img.src = url;
+  });
+}
+const handReady = cleanCutout(HAND_URL, HAND_CROP)
+  .then(u => { handImg.src = u; })
+  .catch(() => { hand.classList.add('raw'); handImg.src = HAND_URL; });
+const bottleReady = jar.decode ? jar.decode().catch(() => {}) : Promise.resolve();
+const fontsReady = Promise.all([
+  document.fonts.load('400 100px "Playfair Display"', 'nuée'),
+  document.fonts.load('500 20px "Playfair Display"'),
+  document.fonts.load('400 16px Outfit'), document.fonts.load('500 16px Outfit')
+]).catch(() => {}).then(() => document.fonts.ready);
+
+/* ---------- boot ---------- */
+layout(); snapAll();
+requestAnimationFrame(render);
+let started = false;
+function begin() {
+  if (started) return; started = true;
+  layout(); snapAll();
+  if (!RM.matches) { ch.intro.snap(0.276 * vh); ch.intro.to(0, { dur: 1600, ease: EI }); }
+  root.classList.remove('intro');
+  startVideo();
+}
+Promise.all([fontsReady, handReady, bottleReady]).then(begin);
+setTimeout(begin, 3500);
+})();
+</script>
+</body>
+</html>
