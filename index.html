@@ -88,7 +88,7 @@ img{display:block;height:auto;user-select:none;-webkit-user-select:none;-webkit-
 .scene.on h2,.scene.on .btn{opacity:1;transform:none}
 
 /* product + hand */
-.jar{position:absolute;left:0;top:0;z-index:5;transform-origin:50% 100%;will-change:transform;
+.jar{position:absolute;left:0;top:0;z-index:7;transform-origin:50% 100%;will-change:transform;
   filter:drop-shadow(0 18px 24px rgba(42,33,24,.18))}
 .hand{position:absolute;left:0;top:0;z-index:6;transform-origin:0 0;overflow:hidden;will-change:transform}
 .hand img{width:100%}
@@ -293,7 +293,7 @@ function layout() {
     hx0 = vw / 2 - 0.63 * hw;
   }
   const hh = hw * HAND_R;
-  handTop = K2.y + 0.05 * K2.h - 0.30 * hh;
+  handTop = K2.y - 0.36 * hh; // bottle stands in front of the palm, its base just below the palm line
   hand.style.width = hw + 'px'; hand.style.height = hh + 'px';
 
   /* final scene */
