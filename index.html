@@ -86,17 +86,25 @@ img{display:block;height:auto;user-select:none;-webkit-user-select:none;-webkit-
   transition:opacity .9s ease .15s,transform 1s cubic-bezier(.22,1,.36,1) .15s,background .3s,color .3s}
 .btn:hover,.btn:focus-visible{background:#F6EEE2;color:#2B1F14}
 .scene.on h2,.scene.on .btn{opacity:1;transform:none}
+/* soft sunlit glow behind the bottle on the pedestal */
+.glow{position:absolute;left:0;top:0;width:var(--gs);height:var(--gs);margin:calc(var(--gs) / -2) 0 0 calc(var(--gs) / -2);
+  border-radius:50%;pointer-events:none;mix-blend-mode:screen;opacity:0;transition:opacity 1.6s ease .2s;
+  background:radial-gradient(circle,rgba(255,224,170,.40) 0%,rgba(255,204,140,.18) 32%,rgba(255,190,120,.06) 52%,rgba(255,190,120,0) 70%)}
+.scene.on .glow{opacity:1;animation:breathe 7s ease-in-out 1.8s infinite alternate}
+@keyframes breathe{from{transform:scale(1);filter:brightness(1)}to{transform:scale(1.08);filter:brightness(1.15)}}
 
 /* product + hand */
 .jar{position:absolute;left:0;top:0;z-index:7;transform-origin:50% 100%;will-change:transform;
-  filter:drop-shadow(0 18px 24px rgba(42,33,24,.18))}
+  filter:drop-shadow(0 18px 24px rgba(42,33,24,.18)) drop-shadow(0 0 0 rgba(255,214,150,0));transition:filter 1.2s ease}
+.jar.lit{filter:drop-shadow(0 18px 24px rgba(42,33,24,.18)) drop-shadow(0 0 48px rgba(255,214,150,.45))}
 .hand{position:absolute;left:0;top:0;z-index:6;transform-origin:0 0;overflow:hidden;will-change:transform}
 .hand img{width:100%}
 .hand.raw img{width:119.35%;margin-top:-27.97%} /* uncropped fallback: 1024/858 and 240/858 */
 
 html.intro .nav,html.intro .mark,html.intro .hero .frame,html.intro .jar{opacity:0}
 @media (prefers-reduced-motion: reduce){
-  .nav,.mark,.in-w,.row,.cta h2,.btn{transition:none !important}
+  .nav,.mark,.in-w,.row,.cta h2,.btn,.glow,.jar{transition:none !important}
+  .scene.on .glow{animation:none}
 }
 </style>
 </head>
@@ -143,6 +151,7 @@ html.intro .nav,html.intro .mark,html.intro .hero .frame,html.intro .jar{opacity
     <div class="frame">
       <img alt="" src="https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20261123_060933_bddedf90-ba56-477b-9c32-901bc025bdb0.png&w=2048&q=85">
     </div>
+    <div class="glow" id="glow"></div>
     <div class="cta" id="cta">
       <h2>BORN OF THE MIST,<br>MADE FOR YOUR SKIN.</h2>
       <a class="btn" href="#home" data-go="0">Discover</a>
@@ -298,6 +307,8 @@ function layout() {
 
   /* final scene */
   K4 = F(720, 697, 240);
+  const glow = $('glow'), gs = K4.h * 2.6;
+  glow.style.left = K4.x + 'px'; glow.style.top = (K4.y - 0.55 * K4.h) + 'px'; setVar(glow, '--gs', gs + 'px');
   if (!portrait) {
     setVar(cta, '--th', Math.max(17, 34 * c) + 'px'); setVar(cta, '--tf', Math.max(12, 16 * c) + 'px');
     setVar(cta, '--tb', Math.max(16, 30 * c) + 'px'); setVar(cta, '--ctop', Math.max(ut + 150 * c, navBottom + 16) + 'px');
@@ -357,7 +368,8 @@ function go(n, instant) {
   timers.forEach(clearTimeout); timers = [];
   const now = performance.now();
   const J = { dur: 1150, ease: EJ }, P7 = { dur: 700, ease: EP }, P65 = { dur: 650, ease: EP };
-  [ingr, bene, scene].forEach(l => l.classList.remove('on'));
+  [ingr, bene, scene, jar].forEach(l => l.classList.remove('on'));
+  jar.classList.remove('lit');
 
   if (n === 0) {
     ch.jar.to(kv(K0), J, now); ch.hero.to(1, P7, now); ch.bene.to(0, P65, now);
@@ -379,6 +391,7 @@ function go(n, instant) {
     ch.handOut.to(1, { dur: 600, ease: EP }, now); ch.rows.to(0, { dur: 400, ease: EF }, now);
     ch.scene.to(1, { dur: 650, ease: EP, delay: 350 }, now);
     setOn(scene, true, 1350);
+    if (instantMode) jar.classList.add('lit'); else timers.push(setTimeout(() => jar.classList.add('lit'), 1350));
   }
   instantMode = false;
 }
