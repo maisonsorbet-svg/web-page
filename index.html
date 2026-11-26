@@ -478,7 +478,11 @@ function go(n, instant) {
     setOn(scene, true, settled ? 0 : 1350);
     if (instantMode || settled) jar.classList.add('lit'); else timers.push(setTimeout(() => jar.classList.add('lit'), 1350));
   }
-  if (n === 4) { info.setAttribute('aria-hidden', 'false'); info.inert = false; try { info.focus({ preventScroll: true }); } catch (e) {} }
+  if (n === 4) {
+    info.setAttribute('aria-hidden', 'false'); info.inert = false;
+    // focus the panel only once it has slid into place (Safari scrolls a focused element into view)
+    timers.push(setTimeout(() => { try { info.focus({ preventScroll: true }); } catch (e) {} unscroll(); }, instantMode ? 0 : 700));
+  }
   else { info.setAttribute('aria-hidden', 'true'); info.inert = true; }
   instantMode = false;
 }
@@ -495,6 +499,7 @@ function render(now) {
   try { frame(now); } catch (e) { reportError(e); }
 }
 function frame(now) {
+  unscroll();
   for (const k in ch) ch[k].tick(now);
   const [x, y, h] = ch.jar.v, w = h / BOT_R, io = ch.intro.v;
   jar.style.transform = `translate3d(${x - W / 2}px,${y - W * BOT_R + io}px,0) scale(${w / W})`;
@@ -598,6 +603,17 @@ addEventListener('keydown', e => {
   else if (k === 'Home') { e.preventDefault(); go(0); }
   else if (k === 'End') { e.preventDefault(); go(3); }
 });
+
+/* the scene containers must never scroll: Safari can scroll an overflow:hidden box when it focuses
+   something inside it or jumps to an #anchor, which would push every scene out of view */
+const pinned = [stage, ...document.querySelectorAll('.layer')];
+function unscroll() {
+  pinned.forEach(el => { if (el.scrollTop || el.scrollLeft) { el.scrollTop = 0; el.scrollLeft = 0; } });
+  const se = document.scrollingElement || document.documentElement;
+  if (se.scrollTop || se.scrollLeft) { se.scrollTop = 0; se.scrollLeft = 0; }
+}
+pinned.forEach(el => el.addEventListener('scroll', unscroll, { passive: true }));
+addEventListener('scroll', unscroll, { passive: true });
 
 function setHash(h) { try { history.replaceState(null, '', h ? '#' + h : location.pathname + location.search); } catch (e) {} }
 const reportError = e => { if (window.NUEE && NUEE.reportError) NUEE.reportError(e); else console.error(e); };
