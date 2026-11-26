@@ -2,6 +2,23 @@
 (() => {
 'use strict';
 
+/* ---------- errors: open any page with ?debug to see them on screen ---------- */
+const DEBUG = /[?&]debug\b/.test(location.search);
+function reportError(e) {
+  try { console.error(e); } catch (_) {}
+  if (!DEBUG || !document.body) return;
+  let box = document.getElementById('nuee-debug');
+  if (!box) {
+    box = document.createElement('pre'); box.id = 'nuee-debug';
+    box.style.cssText = 'position:fixed;left:8px;right:8px;bottom:8px;z-index:99;max-height:40vh;overflow:auto;margin:0;padding:10px 12px;background:#2B1F14;color:#F6EEE2;font:12px/1.4 ui-monospace,monospace;white-space:pre-wrap;border-radius:6px';
+    document.body.appendChild(box);
+  }
+  box.textContent += (e && (e.stack || e.message) || String(e)) + '\n';
+}
+addEventListener('error', ev => reportError(ev.error || ev.message));
+addEventListener('unhandledrejection', ev => reportError(ev.reason));
+if (DEBUG) addEventListener('DOMContentLoaded', () => reportError('debug on · ' + navigator.userAgent));
+
 /* ---------- translations (FR is the default) ---------- */
 const DICT = {
 fr: {
@@ -145,7 +162,10 @@ const LANGS = ['fr', 'uk', 'en'], LABEL = { fr: 'FR', uk: 'UA', en: 'EN' }, LOCA
 let lang = store.get('nuee-lang');
 if (!LANGS.includes(lang)) lang = 'fr';
 const t = k => (DICT[lang][k] ?? DICT.en[k] ?? k);
-const price = n => new Intl.NumberFormat(LOCALE[lang], { style: 'currency', currency: 'EUR', currencyDisplay: 'narrowSymbol' }).format(n);
+const price = n => {
+  try { return new Intl.NumberFormat(LOCALE[lang], { style: 'currency', currency: 'EUR', currencyDisplay: 'narrowSymbol' }).format(n); }
+  catch (e) { return new Intl.NumberFormat(LOCALE[lang], { style: 'currency', currency: 'EUR' }).format(n); }
+};
 
 /* ---------- menu bar + full-screen menu ---------- */
 const root = document.documentElement;
@@ -277,26 +297,27 @@ const ART = {
   }
 };
 const artCache = {};
-const art = k => (artCache[k] ||= svg(ART[k]()));
+const art = k => (artCache[k] || (artCache[k] = svg(ART[k]())));
 function paintArt(scope) { (scope || document).querySelectorAll('[data-art]').forEach(i => { i.style.backgroundImage = art(i.dataset.art); }); }
 
 /* ---------- apply language ---------- */
+function each(sel, fn) { document.querySelectorAll(sel).forEach(el => { try { fn(el); } catch (e) { reportError(e); } }); }
 function applyLang() {
-  root.lang = lang;
-  document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n); });
-  document.querySelectorAll('[data-i18n-html]').forEach(el => { el.innerHTML = t(el.dataset.i18nHtml); });
-  document.querySelectorAll('[data-i18n-ph]').forEach(el => { el.placeholder = t(el.dataset.i18nPh); });
-  document.querySelectorAll('[data-i18n-aria]').forEach(el => { el.setAttribute('aria-label', t(el.dataset.i18nAria)); });
-  document.querySelectorAll('[data-i18n-alt]').forEach(el => { el.alt = t(el.dataset.i18nAlt); });
-  document.querySelectorAll('[data-price]').forEach(el => { el.textContent = price(+el.dataset.price); });
-  document.querySelectorAll('[data-vol]').forEach(el => { el.textContent = `${el.dataset.vol} ${t('unit.ml')}`; });
-  document.querySelectorAll('[data-lang]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.lang === lang)));
-  if (root.dataset.title) document.title = t(root.dataset.title);
+  try { root.lang = lang; } catch (e) {}
+  each('[data-i18n]', el => { el.textContent = t(el.dataset.i18n); });
+  each('[data-i18n-html]', el => { el.innerHTML = t(el.dataset.i18nHtml); });
+  each('[data-i18n-ph]', el => { el.placeholder = t(el.dataset.i18nPh); });
+  each('[data-i18n-aria]', el => { el.setAttribute('aria-label', t(el.dataset.i18nAria)); });
+  each('[data-i18n-alt]', el => { el.alt = t(el.dataset.i18nAlt); });
+  each('[data-price]', el => { el.textContent = price(+el.dataset.price); });
+  each('[data-vol]', el => { el.textContent = `${el.dataset.vol} ${t('unit.ml')}`; });
+  each('[data-lang]', b => b.setAttribute('aria-pressed', String(b.dataset.lang === lang)));
+  try { if (root.dataset.title) document.title = t(root.dataset.title); } catch (e) {}
 }
 function setLang(l) {
   if (!LANGS.includes(l) || l === lang) return;
   lang = l; store.set('nuee-lang', l); applyLang();
-  document.dispatchEvent(new CustomEvent('nuee:lang', { detail: l }));
+  try { document.dispatchEvent(new CustomEvent('nuee:lang', { detail: l })); } catch (e) { reportError(e); }
 }
 document.addEventListener('click', e => { const b = e.target.closest('[data-lang]'); if (b) setLang(b.dataset.lang); });
 
@@ -306,7 +327,7 @@ if (page !== 'home') {
   addEventListener('scroll', onScroll, { passive: true }); onScroll();
 }
 
-window.NUEE = { t, price, lang: () => lang, setLang, applyLang, renderCards, paintArt, art, products: PRODUCTS, toast: showToast, closeMenu: () => setMenu(false) };
+window.NUEE = { reportError,  t, price, lang: () => lang, setLang, applyLang, renderCards, paintArt, art, products: PRODUCTS, toast: showToast, closeMenu: () => setMenu(false) };
 paintArt();
 applyLang();
 renderCart();

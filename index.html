@@ -15,8 +15,8 @@ html,body{height:100%;overflow:hidden;overscroll-behavior:none}
 img{display:block;height:auto;max-width:none;user-select:none;-webkit-user-select:none;-webkit-user-drag:none;pointer-events:none}
 :root{--s:1px;--c:1px;--fl:0px;--ft:0px}
 
-.stage{position:fixed;left:0;top:0;width:100%;height:100svh;overflow:hidden}
-.layer{position:absolute;inset:0;overflow:hidden}
+.stage{position:fixed;left:0;top:0;width:100%;height:100vh;height:100svh;overflow:hidden}
+.layer{position:absolute;top:0;right:0;bottom:0;left:0;overflow:hidden}
 .frame{position:absolute;left:var(--fl);top:var(--ft);width:calc(1440 * var(--s));height:calc(900 * var(--s))}
 
 @media (min-width:768px){
@@ -81,7 +81,8 @@ img{display:block;height:auto;max-width:none;user-select:none;-webkit-user-selec
   padding:.7em 2.2em;font-size:var(--tf);letter-spacing:.04em;color:var(--light);text-decoration:none;line-height:1.2;
   opacity:0;transform:translateY(18px);
   transition:opacity .9s ease .15s,transform 1s cubic-bezier(.22,1,.36,1) .15s,background .3s,color .3s}
-.btn:hover,.btn:focus-visible{background:var(--light);color:var(--dark)}
+.btn:hover{background:var(--light);color:var(--dark)}
+.btn:focus-visible{background:var(--light);color:var(--dark)}
 .scene.on h2,.scene.on .btn{opacity:1;transform:none}
 /* soft sunlit glow behind the bottle on the pedestal */
 .glow{position:absolute;left:0;top:0;width:var(--gs);height:var(--gs);margin:calc(var(--gs) / -2) 0 0 calc(var(--gs) / -2);
@@ -106,13 +107,14 @@ img{display:block;height:auto;max-width:none;user-select:none;-webkit-user-selec
 
 /* about / reviews / contact panel (after scene 4) */
 .home .nav.solid{background:var(--bg);border-bottom-color:var(--line);--nav-pb:12px}
-.info{position:absolute;inset:0;z-index:15;background:var(--bg);overflow-y:auto;overscroll-behavior:contain;
+.info{position:absolute;top:0;right:0;bottom:0;left:0;z-index:15;background:var(--bg);overflow-y:auto;overscroll-behavior:contain;
   transform:translateY(100%);will-change:transform;outline:none}
 .blk{padding-top:clamp(110px,16vh,170px)}
 .blk h2{font-family:var(--serif);font-weight:400;font-size:clamp(32px,4.2vw,54px);line-height:1.1;margin-top:10px;text-wrap:balance}
 .about{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(32px,6vw,88px);align-items:center}
 .about p{font-size:17px;line-height:1.65;color:var(--ink2);margin-top:20px;max-width:56ch}
 .about figure{aspect-ratio:4/5;overflow:hidden;background:var(--bg3)}
+@supports not (aspect-ratio:1/1){.about figure{height:min(70vh,640px)}}
 .about figure img{width:100%;height:100%;object-fit:cover;object-position:50% 62%}
 .revs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;margin-top:40px}
 .rev{background:var(--bg3);padding:32px 28px;display:flex;flex-direction:column;gap:16px}
@@ -318,7 +320,7 @@ const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const setVar = (el, k, v) => el.style.setProperty(k, v);
 
 function layout() {
-  vw = innerWidth; vh = stage.clientHeight;
+  vw = innerWidth; vh = stage.clientHeight || innerHeight;
   s = Math.max(vw / 1440, vh / 900); c = Math.min(vw / 1440, vh / 900);
   fl = (vw - 1440 * s) / 2; ft = (vh - 900 * s) / 2; ul = (vw - 1440 * c) / 2; ut = (vh - 900 * c) / 2;
   portrait = vw / vh < 0.9;
@@ -489,6 +491,10 @@ function snapAll() {
 
 /* ---------- render loop ---------- */
 function render(now) {
+  requestAnimationFrame(render);
+  try { frame(now); } catch (e) { reportError(e); }
+}
+function frame(now) {
   for (const k in ch) ch[k].tick(now);
   const [x, y, h] = ch.jar.v, w = h / BOT_R, io = ch.intro.v;
   jar.style.transform = `translate3d(${x - W / 2}px,${y - W * BOT_R + io}px,0) scale(${w / W})`;
@@ -506,7 +512,6 @@ function render(now) {
   nav.classList.toggle('light', sc > 0.96 && iv < 0.5);
   nav.classList.toggle('solid', iv > 0.5);
   videoTick(hv);
-  requestAnimationFrame(render);
 }
 
 /* ---------- hero water loop (two-video crossfade) ---------- */
@@ -594,19 +599,22 @@ addEventListener('keydown', e => {
   else if (k === 'End') { e.preventDefault(); go(3); }
 });
 
+function setHash(h) { try { history.replaceState(null, '', h ? '#' + h : location.pathname + location.search); } catch (e) {} }
+const reportError = e => { if (window.NUEE && NUEE.reportError) NUEE.reportError(e); else console.error(e); };
+
 /* sections of the info panel */
 function openSection(id, instant) {
   const sec = $(id); if (!sec) return;
   const wasOpen = state === 4;
   if (!wasOpen) go(4, instant);
   const top = id === 'about' ? 0 : sec.offsetTop - (nav.offsetHeight - 40);
-  info.scrollTo({ top, behavior: wasOpen && !RM.matches ? 'smooth' : 'auto' });
+  try { info.scrollTo({ top, behavior: wasOpen && !RM.matches ? 'smooth' : 'auto' }); } catch (e) { info.scrollTop = top; }
   lockUntil = performance.now() + 1000;
 }
 window.nueeHome = {
   nav(k) {
-    if (k === 'home') { go(0); lockUntil = performance.now() + 1000; info.scrollTop = 0; if (location.hash) history.replaceState(null, '', location.pathname); }
-    else if (['about', 'reviews', 'contact'].includes(k)) { openSection(k); history.replaceState(null, '', '#' + k); }
+    if (k === 'home') { go(0); lockUntil = performance.now() + 1000; info.scrollTop = 0; if (location.hash) setHash(''); }
+    else if (['about', 'reviews', 'contact'].includes(k)) { openSection(k); setHash(k); }
   }
 };
 const hashSection = () => { const h = location.hash.slice(1); return ['about', 'reviews', 'contact'].includes(h) ? h : null; };
