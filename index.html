@@ -97,6 +97,15 @@ img{display:block;height:auto;max-width:none;user-select:none;-webkit-user-selec
 .hand{position:absolute;left:0;top:0;z-index:6;transform-origin:0 0;overflow:hidden;will-change:transform;pointer-events:none}
 .hand img{width:100%}
 .hand.raw img{width:119.35%;margin-top:-27.97%}
+/* the bottle sits in the palm: a front copy of the hand, clipped to the near side of the palm, covers its base */
+.hand-front{z-index:8;
+  -webkit-mask-image:radial-gradient(ellipse var(--mrx) var(--mry) at var(--mx) var(--my),transparent 94%,#000 100%),linear-gradient(#000,#000);
+  mask-image:radial-gradient(ellipse var(--mrx) var(--mry) at var(--mx) var(--my),transparent 94%,#000 100%),linear-gradient(#000,#000);
+  -webkit-mask-size:100% 100%,var(--mw) var(--mh);mask-size:100% 100%,var(--mw) var(--mh);
+  -webkit-mask-position:0 0,var(--ml) var(--mt);mask-position:0 0,var(--ml) var(--mt);-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
+  -webkit-mask-composite:source-in;mask-composite:intersect}
+.palm-shadow{position:absolute;left:63%;top:var(--py,46%);width:var(--pw,80px);height:calc(var(--pw,80px) * .24);transform:translate(-50%,-50%);
+  border-radius:50%;background:radial-gradient(closest-side,rgba(70,40,22,.38),rgba(70,40,22,0));pointer-events:none}
 
 /* about / reviews / contact panel (after scene 4) */
 .home .nav.solid{background:var(--bg);border-bottom-color:var(--line);--nav-pb:12px}
@@ -188,7 +197,8 @@ html.intro .nav,html.intro .mark,html.intro .hero .frame,html.intro .jar,html.in
   </section>
 
   <img class="jar" id="jar" alt="Flacon compte-gouttes de sérum nuée" src="assets/nuee-serum.webp">
-  <div class="hand" id="hand"><img id="handImg" alt=""></div>
+  <div class="hand" id="hand"><img id="handImg" alt=""><i class="palm-shadow" id="palmShadow"></i></div>
+  <div class="hand hand-front" id="handFront" aria-hidden="true"><img id="handImg2" alt=""></div>
 
   <section class="info" id="info" tabindex="-1">
     <div class="wrap blk about" id="about">
@@ -247,7 +257,7 @@ const $ = id => document.getElementById(id);
 const root = document.documentElement;
 const stage = $('stage'), nav = $('nav'), hero = $('hero'), heroFrame = $('heroFrame'), mark = $('mark'), heroCta = $('heroCta');
 const ingr = $('ingr'), bene = $('bene'), rowsEl = $('rows'), scene = $('scene'), cta = $('cta'), info = $('info');
-const jar = $('jar'), hand = $('hand'), handImg = $('handImg');
+const jar = $('jar'), hand = $('hand'), handImg = $('handImg'), handFront = $('handFront'), handImg2 = $('handImg2');
 const va = $('va'), vb = $('vb');
 const chips = [...document.querySelectorAll('.chip')];
 const RM = matchMedia('(prefers-reduced-motion: reduce)');
@@ -374,8 +384,18 @@ function layout() {
     hx0 = vw / 2 - 0.63 * hw;
   }
   const hh = hw * HAND_R;
-  handTop = K2.y - 0.36 * hh; // bottle stands in front of the palm, its base just below the palm line
-  hand.style.width = hw + 'px'; hand.style.height = hh + 'px';
+  const SEAT = 0.46;            // bottle base sits 46% down the hand image, in the middle of the palm
+  handTop = K2.y - SEAT * hh;
+  [hand, handFront].forEach(el => { el.style.width = hw + 'px'; el.style.height = hh + 'px'; });
+  setVar(hand, '--py', SEAT * 100 + '%'); setVar(hand, '--pw', 1.3 * K2.h / BOT_R + 'px');
+  $('palmShadow').style.left = ((K2.x - hx0) / hw * 100) + '%';
+  // front copy of the hand: visible only in a band around the bottle base, with a curved opening so the
+  // palm rises around the sides of the base (cupped) and the centre of the base stays just visible
+  const bw = K2.h / BOT_R, bx = K2.x - hx0, by = SEAT * hh;
+  setVar(handFront, '--mx', bx + 'px'); setVar(handFront, '--my', (by - 0.42 * bw) + 'px');
+  setVar(handFront, '--mrx', 0.58 * bw + 'px'); setVar(handFront, '--mry', 0.45 * bw + 'px');
+  setVar(handFront, '--ml', (bx - 0.9 * bw) + 'px'); setVar(handFront, '--mt', (by - 0.3 * bw) + 'px');
+  setVar(handFront, '--mw', 1.8 * bw + 'px'); setVar(handFront, '--mh', (hh - by + 0.3 * bw) + 'px');
 
   /* final scene */
   K4 = F(720, 697, 240);
@@ -496,7 +516,7 @@ function render(now) {
   heroFrame.style.transform = `translate3d(0,${io}px,0) scale(${1 + (1 - hv) * 0.06})`;
   const b = ch.bene.v;
   bene.style.transform = `translate3d(0,${(1 - b) * 100}%,0)`;
-  hand.style.transform = `translate3d(${hx0 - ch.handOut.v * (hx0 + 1.05 * hw)}px,${handTop + (1 - b) * vh}px,0)`;
+  hand.style.transform = handFront.style.transform = `translate3d(${hx0 - ch.handOut.v * (hx0 + 1.05 * hw)}px,${handTop + (1 - b) * vh}px,0)`;
   rowsEl.style.opacity = ch.rows.v;
   const sc = ch.scene.v, iv = ch.info.v;
   scene.style.transform = `translate3d(0,${(1 - sc) * 100}%,0)`;
@@ -670,8 +690,8 @@ function cleanCutout(url, crop) {
   });
 }
 const handReady = cleanCutout(HAND_URL, HAND_CROP)
-  .then(u => { handImg.src = u; })
-  .catch(() => { hand.classList.add('raw'); handImg.src = HAND_URL; });
+  .then(u => { handImg.src = handImg2.src = u; })
+  .catch(() => { hand.classList.add('raw'); handFront.classList.add('raw'); handImg.src = handImg2.src = HAND_URL; });
 const bottleReady = jar.decode ? jar.decode().catch(() => {}) : Promise.resolve();
 const fontsReady = Promise.all([
   document.fonts.load('400 100px "Playfair Display"', 'nuée'),
