@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="fr" data-title="title.shop">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Boutique · nuée</title>
+<meta name="description" content="Boutique nuée : six soins aux formules courtes et légères.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600&family=Jost:wght@400;500&family=Playfair+Display:wght@400;500&display=swap">
+<link rel="stylesheet" href="assets/site.css">
+</head>
+<body class="page" data-page="shop">
+<nav class="nav" id="nav" aria-label="Menu"></nav>
+<main>
+  <div class="wrap">
+    <header class="page-head">
+      <p class="eyebrow" data-i18n="shop.eyebrow">Boutique</p>
+      <h1 data-i18n="shop.title">Les essentiels nuée</h1>
+      <p data-i18n="shop.intro"></p>
+    </header>
+    <div class="grid" id="grid"></div>
+  </div>
+</main>
+<footer class="foot">
+  <div class="wrap"><b>nuée</b><span data-i18n="footer.note"></span><span>© 2026</span></div>
+</footer>
+<script src="assets/site.js"></script>
+<script>NUEE.renderCards(document.getElementById('grid'));</script>
+</body>
+</html>

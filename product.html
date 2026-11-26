@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="fr" data-title="title.product">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sérum Éclat · nuée</title>
+<meta name="description" content="Sérum Éclat nuée, 30 ml : acide hyaluronique, niacinamide, vitamine C, squalane et vitamine E.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600&family=Jost:wght@400;500&family=Playfair+Display:wght@400;500&display=swap">
+<link rel="stylesheet" href="assets/site.css">
+</head>
+<body class="page" data-page="product">
+<nav class="nav" id="nav" aria-label="Menu"></nav>
+<main>
+  <div class="wrap">
+    <div class="pdp">
+      <div class="pdp-img"><img src="assets/products/serum.webp" alt="" data-i18n-alt="p.serum.name" width="1200" height="1500"></div>
+      <div class="pdp-info">
+        <a class="back" href="shop.html">← <span data-i18n="pp.back"></span></a>
+        <h1 data-i18n="p.serum.name">Sérum Éclat</h1>
+        <div class="pdp-meta"><span class="price" data-price="48"></span><span class="vol"><span data-i18n="pp.volume"></span> · <span data-vol="30"></span></span></div>
+        <p class="pdp-desc" data-i18n="pp.desc"></p>
+        <div class="buy">
+          <div class="qty">
+            <button type="button" id="qMinus" data-i18n-aria="pp.less">−</button>
+            <label class="qty-label" for="qty" data-i18n="pp.qty"></label>
+            <input id="qty" type="number" min="1" max="99" value="1" inputmode="numeric">
+            <button type="button" id="qPlus" data-i18n-aria="pp.more">+</button>
+          </div>
+          <button class="pill solid" type="button" data-add="serum" data-qty="#qty" data-i18n="cart.add"></button>
+        </div>
+        <section>
+          <h2 data-i18n="pp.ingredients"></h2>
+          <div class="ings">
+            <div class="ing"><span class="disc"><i data-art="ha"></i></span><b data-i18n="ing.ha.name"></b><span data-i18n="ing.ha.line"></span></div>
+            <div class="ing"><span class="disc"><i data-art="nia"></i></span><b data-i18n="ing.nia.name"></b><span data-i18n="ing.nia.line"></span></div>
+            <div class="ing"><span class="disc"><i data-art="vc"></i></span><b data-i18n="ing.vc.name"></b><span data-i18n="ing.vc.line"></span></div>
+            <div class="ing"><span class="disc"><i data-art="sq"></i></span><b data-i18n="ing.sq.name"></b><span data-i18n="ing.sq.line"></span></div>
+            <div class="ing"><span class="disc"><i data-art="ve"></i></span><b data-i18n="ing.ve.name"></b><span data-i18n="ing.ve.line"></span></div>
+          </div>
+        </section>
+        <section>
+          <h2 data-i18n="pp.howto"></h2>
+          <ol class="steps">
+            <li data-i18n="pp.step1"></li>
+            <li data-i18n="pp.step2"></li>
+            <li data-i18n="pp.step3"></li>
+          </ol>
+        </section>
+      </div>
+    </div>
+    <div class="also">
+      <h2 data-i18n="pp.also"></h2>
+      <div class="grid" id="also"></div>
+    </div>
+  </div>
+</main>
+<footer class="foot">
+  <div class="wrap"><b>nuée</b><span data-i18n="footer.note"></span><span>© 2026</span></div>
+</footer>
+<script src="assets/site.js"></script>
+<script>
+NUEE.renderCards(document.getElementById('also'), ['cream', 'toner', 'eye']);
+const q = document.getElementById('qty');
+const setQ = v => { q.value = Math.max(1, Math.min(99, (parseInt(v, 10) || 1))); };
+document.getElementById('qMinus').addEventListener('click', () => setQ(+q.value - 1));
+document.getElementById('qPlus').addEventListener('click', () => setQ(+q.value + 1));
+q.addEventListener('change', () => setQ(q.value));
+</script>
+</body>
+</html>
