@@ -90,22 +90,19 @@ img{display:block;height:auto;max-width:none;user-select:none;-webkit-user-selec
 .scene.on .glow{opacity:1;animation:breathe 7s ease-in-out 1.8s infinite alternate}
 @keyframes breathe{from{transform:scale(1);filter:brightness(1)}to{transform:scale(1.08);filter:brightness(1.15)}}
 
-/* product + hand */
+/* product + shelf */
 .jar{position:absolute;left:0;top:0;z-index:7;transform-origin:50% 100%;will-change:transform;
   filter:drop-shadow(0 18px 24px rgba(42,33,24,.18)) drop-shadow(0 0 0 rgba(255,214,150,0));transition:filter 1.2s ease}
 .jar.lit{filter:drop-shadow(0 18px 24px rgba(42,33,24,.18)) drop-shadow(0 0 48px rgba(255,214,150,.45))}
-.hand{position:absolute;left:0;top:0;z-index:6;transform-origin:0 0;overflow:hidden;will-change:transform;pointer-events:none}
-.hand img{width:100%}
-.hand.raw img{width:119.35%;margin-top:-27.97%}
-/* the bottle sits in the palm: a front copy of the hand, clipped to the near side of the palm, covers its base */
-.hand-front{z-index:8;
-  -webkit-mask-image:radial-gradient(ellipse var(--mrx) var(--mry) at var(--mx) var(--my),transparent 94%,#000 100%),linear-gradient(#000,#000);
-  mask-image:radial-gradient(ellipse var(--mrx) var(--mry) at var(--mx) var(--my),transparent 94%,#000 100%),linear-gradient(#000,#000);
-  -webkit-mask-size:100% 100%,var(--mw) var(--mh);mask-size:100% 100%,var(--mw) var(--mh);
-  -webkit-mask-position:0 0,var(--ml) var(--mt);mask-position:0 0,var(--ml) var(--mt);-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
-  -webkit-mask-composite:source-in;mask-composite:intersect}
-.palm-shadow{position:absolute;left:63%;top:var(--py,46%);width:var(--pw,80px);height:calc(var(--pw,80px) * .24);transform:translate(-50%,-50%);
-  border-radius:50%;background:radial-gradient(closest-side,rgba(70,40,22,.38),rgba(70,40,22,0));pointer-events:none}
+.shelf{position:absolute;left:0;top:0;z-index:6;width:var(--sw);height:calc(var(--sd) + var(--st));will-change:transform;pointer-events:none}
+.shelf i{position:absolute;display:block}
+.shelf-top{left:0;right:0;top:0;height:var(--sd);border-radius:0 var(--sr) 0 0;
+  background:linear-gradient(180deg,#eee8df 0%,#f8f5f0 45%,#fffefc 100%)}
+.shelf-front{left:0;right:0;top:var(--sd);height:var(--st);border-radius:0 3px var(--sr) 0;
+  background:linear-gradient(180deg,#fdfbf8 0%,#f1ebe3 50%,#e2d9cc 100%);
+  box-shadow:inset 0 1px 0 #fff,inset -2px 0 3px rgba(120,95,70,.12),0 calc(var(--st) * 1.2) calc(var(--st) * 1.8) calc(var(--st) * -.3) rgba(70,48,28,.26),0 3px 5px -2px rgba(70,48,28,.2)}
+.shelf-contact{top:calc(var(--sd) * .62);left:var(--cx);width:var(--cw);height:calc(var(--sd) * .8);transform:translate(-50%,-50%);border-radius:50%;
+  background:radial-gradient(closest-side,rgba(60,40,22,.45),rgba(60,40,22,.14) 60%,rgba(60,40,22,0))}
 
 /* about / reviews / contact panel (after scene 4) */
 .home .nav.solid{background:var(--bg);border-bottom-color:var(--line);--nav-pb:12px}
@@ -197,8 +194,7 @@ html.intro .nav,html.intro .mark,html.intro .hero .frame,html.intro .jar,html.in
   </section>
 
   <img class="jar" id="jar" alt="Flacon compte-gouttes de sérum nuée" src="assets/nuee-serum.webp">
-  <div class="hand" id="hand"><img id="handImg" alt=""><i class="palm-shadow" id="palmShadow"></i></div>
-  <div class="hand hand-front" id="handFront" aria-hidden="true"><img id="handImg2" alt=""></div>
+  <div class="shelf" id="shelf" aria-hidden="true"><i class="shelf-top"></i><i class="shelf-contact"></i><i class="shelf-front"></i></div>
 
   <section class="info" id="info" tabindex="-1">
     <div class="wrap blk about" id="about">
@@ -247,17 +243,14 @@ html.intro .nav,html.intro .mark,html.intro .hero .frame,html.intro .jar,html.in
 <script>
 (() => {
 'use strict';
-const HAND_URL = 'assets/hand-raw.webp';
-const HAND_CROP = [0, 240, 858, 262];
-const HAND_R = 262 / 858;
-const BOT_R = 597 / 185;            // serum bottle cutout height / width
+const BOT_R = 1293 / 397;           // serum bottle cutout height / width
 const PHOTO = 'assets/nuee-serum-photo.jpg', PHOTO_N = 736;
 
 const $ = id => document.getElementById(id);
 const root = document.documentElement;
 const stage = $('stage'), nav = $('nav'), hero = $('hero'), heroFrame = $('heroFrame'), mark = $('mark'), heroCta = $('heroCta');
 const ingr = $('ingr'), bene = $('bene'), rowsEl = $('rows'), scene = $('scene'), cta = $('cta'), info = $('info');
-const jar = $('jar'), hand = $('hand'), handImg = $('handImg'), handFront = $('handFront'), handImg2 = $('handImg2');
+const jar = $('jar'), shelf = $('shelf');
 const va = $('va'), vb = $('vb');
 const chips = [...document.querySelectorAll('.chip')];
 const RM = matchMedia('(prefers-reduced-motion: reduce)');
@@ -318,7 +311,7 @@ let instantMode = false;
 
 /* ---------- layout ---------- */
 let vw, vh, s, c, fl, ft, ul, ut, portrait, navBottom;
-let K0, K1, K2, K4, W = 300, hw = 900, hx0 = 0, handTop = 0;
+let K0, K1, K2, K4, W = 300, shelfX = -24, shelfW = 600, shelfTop = 0;
 const F = (x, y, h) => ({ x: fl + x * s, y: ft + y * s, h: h * s });
 const U = (x, y, h) => ({ x: ul + x * c, y: ut + y * c, h: h * c });
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
@@ -366,11 +359,7 @@ function layout() {
     setVar(bene, '--rt', Math.max(48, 96 * c) + 'px'); setVar(bene, '--rh', Math.max(14, 25 * c) + 'px');
     setVar(bene, '--rp', Math.max(11, 16.5 * c) + 'px'); setVar(bene, '--rg', Math.max(14, 40 * c) + 'px');
     setVar(bene, '--rw', Math.max(200, 330 * c) + 'px'); setVar(bene, '--rl', (ul + 915 * c) + 'px');
-    K2 = U(465, 640, 340);
-    hw = K2.h * 2.8;
-    hx0 = K2.x - 0.56 * hw;
-    K2.x = hx0 + 0.63 * hw;
-    if (hx0 > 0) { hw = K2.x / 0.63; hx0 = 0; } // forearm always runs off the left edge
+    K2 = U(500, 640, 340);
   } else {
     setVar(bene, '--rt', Math.min(Math.max(48, 0.13 * vw), 76) + 'px'); setVar(bene, '--rh', Math.min(Math.max(15, 0.042 * vw), 22) + 'px');
     setVar(bene, '--rp', Math.min(Math.max(12, 0.033 * vw), 16) + 'px'); setVar(bene, '--rg', Math.min(Math.max(12, 0.022 * vh), 26) + 'px');
@@ -380,22 +369,13 @@ function layout() {
     const y = 0.80 * vh;
     const h = Math.max(90, Math.min(0.30 * vh, 0.8 * vw, y - rowsBottom - 16));
     K2 = { x: vw / 2, y, h };
-    hw = Math.max(h * 2.8, 1.15 * vw);
-    hx0 = vw / 2 - 0.63 * hw;
   }
-  const hh = hw * HAND_R;
-  const SEAT = 0.46;            // bottle base sits 46% down the hand image, in the middle of the palm
-  handTop = K2.y - SEAT * hh;
-  [hand, handFront].forEach(el => { el.style.width = hw + 'px'; el.style.height = hh + 'px'; });
-  setVar(hand, '--py', SEAT * 100 + '%'); setVar(hand, '--pw', 1.3 * K2.h / BOT_R + 'px');
-  $('palmShadow').style.left = ((K2.x - hx0) / hw * 100) + '%';
-  // front copy of the hand: visible only in a band around the bottle base, with a curved opening so the
-  // palm rises around the sides of the base (cupped) and the centre of the base stays just visible
-  const bw = K2.h / BOT_R, bx = K2.x - hx0, by = SEAT * hh;
-  setVar(handFront, '--mx', bx + 'px'); setVar(handFront, '--my', (by - 0.42 * bw) + 'px');
-  setVar(handFront, '--mrx', 0.58 * bw + 'px'); setVar(handFront, '--mry', 0.45 * bw + 'px');
-  setVar(handFront, '--ml', (bx - 0.9 * bw) + 'px'); setVar(handFront, '--mt', (by - 0.3 * bw) + 'px');
-  setVar(handFront, '--mw', 1.8 * bw + 'px'); setVar(handFront, '--mh', (hh - by + 0.3 * bw) + 'px');
+  /* white floating shelf coming in from the left; the serum's base sits on its top face */
+  const bw = K2.h / BOT_R, sd = Math.max(8, 0.34 * bw), st = Math.max(6, 0.2 * bw);
+  shelfW = K2.x - shelfX + (portrait ? 2.2 : 2.6) * bw;
+  shelfTop = K2.y - 0.62 * sd;
+  setVar(shelf, '--sw', shelfW + 'px'); setVar(shelf, '--sd', sd + 'px'); setVar(shelf, '--st', st + 'px');
+  setVar(shelf, '--sr', 0.6 * sd + 'px'); setVar(shelf, '--cx', (K2.x - shelfX) + 'px'); setVar(shelf, '--cw', 1.45 * bw + 'px');
 
   /* final scene */
   K4 = F(720, 697, 240);
@@ -449,7 +429,7 @@ function layoutMark() {
 
 /* ---------- channels & states ---------- */
 const ch = {
-  jar: new Channel([0, 0, 0]), hero: new Channel(1), bene: new Channel(0), handOut: new Channel(0),
+  jar: new Channel([0, 0, 0]), hero: new Channel(1), bene: new Channel(0), shelfOut: new Channel(0),
   rows: new Channel(0), scene: new Channel(0), info: new Channel(0), intro: new Channel(0)
 };
 const key = n => [K0, K1, K2, K4, K4][n];
@@ -474,15 +454,16 @@ function go(n, instant) {
 
   if (n === 0) {
     ch.jar.to(kv(K0), J, now); ch.hero.to(1, P7, now); ch.bene.to(0, P65, now);
-    ch.handOut.to(0, P65, now); ch.rows.to(0, { dur: 400, ease: EF }, now); ch.scene.to(0, P65, now);
+    ch.shelfOut.to(0, P65, now); ch.rows.to(0, { dur: 400, ease: EF }, now); ch.scene.to(0, P65, now);
   } else if (n === 1) {
     ch.jar.to(kv(K1), J, now); ch.hero.to(0, P7, now); ch.bene.to(0, P65, now);
-    ch.handOut.to(0, P65, now); ch.rows.to(0, { dur: 400, ease: EF }, now); ch.scene.to(0, P65, now);
+    ch.shelfOut.to(0, P65, now); ch.rows.to(0, { dur: 400, ease: EF }, now); ch.scene.to(0, P65, now);
     setOn(ingr, true, from < 1 ? 1000 : 600);
   } else if (n === 2) {
     const back = from >= 3;
-    ch.jar.to(kv(K2), J, now); ch.hero.to(0, P7, now); ch.bene.to(1, P65, now); ch.scene.to(0, P65, now);
-    ch.handOut.to(0, { dur: 650, ease: EP, delay: back ? 150 : 0 }, now);
+    ch.jar.to(kv(K2), { dur: 1150, ease: EJ, delay: from === 1 ? 140 : 0 }, now);   // the shelf shows first, then the serum lands on it
+    ch.hero.to(0, P7, now); ch.bene.to(1, P65, now); ch.scene.to(0, P65, now);
+    ch.shelfOut.to(0, { dur: 650, ease: EP, delay: back ? 150 : 0 }, now);
     ch.rows.to(1, { dur: 500, ease: EF, delay: back ? 300 : 0 }, now);
     setOn(bene, true, back ? 350 : 550);
   } else {
@@ -490,7 +471,7 @@ function go(n, instant) {
     if (from === 2) ch.jar.to(kv(K4), [{ dur: 700, ease: EJ }, { dur: 1600, ease: EY }, { dur: 1600, ease: EJ }], now);
     else ch.jar.to(kv(K4), J, now);
     ch.hero.to(0, P7, now);
-    ch.handOut.to(1, { dur: 600, ease: EP }, now); ch.rows.to(0, { dur: 400, ease: EF }, now);
+    ch.shelfOut.to(1, { dur: 600, ease: EP }, now); ch.rows.to(0, { dur: 400, ease: EF }, now);
     ch.scene.to(1, { dur: 650, ease: EP, delay: settled ? 0 : 350 }, now);
     setOn(scene, true, settled ? 0 : 1350);
     if (instantMode || settled) jar.classList.add('lit'); else timers.push(setTimeout(() => jar.classList.add('lit'), 1350));
@@ -502,7 +483,7 @@ function go(n, instant) {
 function snapAll() {
   const n = state;
   ch.jar.snap(kv(key(n)));
-  ch.hero.snap(n === 0 ? 1 : 0); ch.bene.snap(n >= 2 ? 1 : 0); ch.handOut.snap(n >= 3 ? 1 : 0);
+  ch.hero.snap(n === 0 ? 1 : 0); ch.bene.snap(n >= 2 ? 1 : 0); ch.shelfOut.snap(n >= 3 ? 1 : 0);
   ch.rows.snap(n === 2 ? 1 : 0); ch.scene.snap(n >= 3 ? 1 : 0); ch.info.snap(n === 4 ? 1 : 0);
 }
 
@@ -516,7 +497,7 @@ function render(now) {
   heroFrame.style.transform = `translate3d(0,${io}px,0) scale(${1 + (1 - hv) * 0.06})`;
   const b = ch.bene.v;
   bene.style.transform = `translate3d(0,${(1 - b) * 100}%,0)`;
-  hand.style.transform = handFront.style.transform = `translate3d(${hx0 - ch.handOut.v * (hx0 + 1.05 * hw)}px,${handTop + (1 - b) * vh}px,0)`;
+  shelf.style.transform = `translate3d(${shelfX - ch.shelfOut.v * (shelfW + 40)}px,${shelfTop + (1 - b) * vh}px,0)`;
   rowsEl.style.opacity = ch.rows.v;
   const sc = ch.scene.v, iv = ch.info.v;
   scene.style.transform = `translate3d(0,${(1 - sc) * 100}%,0)`;
@@ -657,41 +638,6 @@ document.querySelectorAll('.thumb i').forEach(i => {
   i.style.backgroundPosition = `${(cx - S / 2) / (PHOTO_N - S) * 100}% ${(cy - S / 2) / (PHOTO_N - S) * 100}%`;
 });
 
-/* ---------- hand cutout clean-up (erode 2px, feather once) ---------- */
-function cleanCutout(url, crop) {
-  return new Promise((res, rej) => {
-    const img = new Image(); img.crossOrigin = 'anonymous';
-    img.onload = () => {
-      try {
-        const [cx, cy, cw, chh] = crop, cv = document.createElement('canvas');
-        cv.width = cw; cv.height = chh;
-        const g = cv.getContext('2d'); g.drawImage(img, cx, cy, cw, chh, 0, 0, cw, chh);
-        const d = g.getImageData(0, 0, cw, chh), px = d.data, n = cw * chh;
-        let a = new Uint8ClampedArray(n); for (let i = 0; i < n; i++) a[i] = px[i * 4 + 3];
-        const at = (A, x, y) => (x < 0 || y < 0 || x >= cw || y >= chh) ? 0 : A[y * cw + x];
-        for (let pass = 0; pass < 2; pass++) {
-          const b = new Uint8ClampedArray(n);
-          for (let y = 0; y < chh; y++) for (let x = 0; x < cw; x++)
-            b[y * cw + x] = Math.min(at(a, x, y), at(a, x - 1, y), at(a, x + 1, y), at(a, x, y - 1), at(a, x, y + 1));
-          a = b;
-        }
-        const f = new Uint8ClampedArray(n);
-        for (let y = 0; y < chh; y++) for (let x = 0; x < cw; x++) {
-          let sum = 4 * a[y * cw + x], cnt = 4;
-          [[-1, 0], [1, 0], [0, -1], [0, 1]].forEach(([dx, dy]) => { const X = x + dx, Y = y + dy; if (X >= 0 && Y >= 0 && X < cw && Y < chh) { sum += a[Y * cw + X]; cnt++; } });
-          f[y * cw + x] = sum / cnt;
-        }
-        for (let i = 0; i < n; i++) px[i * 4 + 3] = f[i];
-        g.putImageData(d, 0, 0);
-        cv.toBlob(bl => bl ? res(URL.createObjectURL(bl)) : rej(), 'image/webp', 0.92);
-      } catch (e) { rej(e); }
-    };
-    img.onerror = rej; img.src = url;
-  });
-}
-const handReady = cleanCutout(HAND_URL, HAND_CROP)
-  .then(u => { handImg.src = handImg2.src = u; })
-  .catch(() => { hand.classList.add('raw'); handFront.classList.add('raw'); handImg.src = handImg2.src = HAND_URL; });
 const bottleReady = jar.decode ? jar.decode().catch(() => {}) : Promise.resolve();
 const fontsReady = Promise.all([
   document.fonts.load('400 100px "Playfair Display"', 'nuée'),
@@ -714,7 +660,7 @@ function begin() {
   root.classList.remove('intro');
   startVideo();
 }
-Promise.all([fontsReady, handReady, bottleReady]).then(begin);
+Promise.all([fontsReady, bottleReady]).then(begin);
 setTimeout(begin, 3500);
 })();
 </script>
